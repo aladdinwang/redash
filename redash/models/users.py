@@ -39,7 +39,7 @@ def sync_last_active_at():
     for user_id in user_ids:
         timestamp = redis_connection.hget(LAST_ACTIVE_KEY, user_id)
         active_at = dt_from_timestamp(timestamp)
-        user = User.query.filter(User.id == user_id).first()
+        user = User.query.filter(User.id == int(user_id)).first()
         if user:
             user.active_at = active_at
         redis_connection.hdel(LAST_ACTIVE_KEY, user_id)
@@ -165,7 +165,7 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
         if self._profile_image_url is not None:
             return self._profile_image_url
 
-        email_md5 = hashlib.md5(self.email.lower()).hexdigest()
+        email_md5 = hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
         return "https://www.gravatar.com/avatar/{}?s=40&d=identicon".format(email_md5)
 
     @property
@@ -234,7 +234,7 @@ class User(TimestampMixin, db.Model, BelongsToOrgMixin, UserMixin, PermissionsCh
 
     def get_id(self):
         identity = hashlib.md5(
-            "{},{}".format(self.email, self.password_hash)
+            "{},{}".format(self.email, self.password_hash).encode('utf-8')
         ).hexdigest()
         return u"{0}-{1}".format(self.id, identity)
 

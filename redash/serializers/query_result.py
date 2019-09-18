@@ -1,4 +1,4 @@
-import cStringIO
+import io as cStringIO
 import csv
 import xlsxwriter
 from funcy import rpartial, project
@@ -77,7 +77,7 @@ def serialize_query_result_to_csv(query_result):
     writer.writeheader()
 
     for row in query_data['rows']:
-        for col_name, converter in special_columns.iteritems():
+        for col_name, converter in special_columns.items():
             if col_name in row:
                 row[col_name] = converter(row[col_name])
 

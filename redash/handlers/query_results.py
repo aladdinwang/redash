@@ -225,7 +225,7 @@ class QueryResultResource(BaseResource):
         # This method handles two cases: retrieving result by id & retrieving result by query id.
         # They need to be split, as they have different logic (for example, retrieving by query id
         # should check for query parameters and shouldn't cache the result).
-        should_cache = query_result_id is not None
+        should_cache = query_result_id is not None and False
 
         parameter_values = collect_parameters_from_request(request.args)
         max_age = int(request.args.get('maxAge', 0))

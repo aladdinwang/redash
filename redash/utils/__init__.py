@@ -1,5 +1,5 @@
 import codecs
-import cStringIO
+import io as cStringIO
 import csv
 import datetime
 import decimal
@@ -175,7 +175,7 @@ class UnicodeWriter:
 def collect_parameters_from_request(args):
     parameters = {}
 
-    for k, v in args.iteritems():
+    for k, v in args.items():
         if k.startswith('p_'):
             parameters[k[2:]] = v
 

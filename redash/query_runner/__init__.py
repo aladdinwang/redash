@@ -83,7 +83,7 @@ class BaseQueryRunner(object):
         if not self.should_annotate_query:
             return query
 
-        annotation = u", ".join([u"{}: {}".format(k, v) for k, v in metadata.iteritems()])
+        annotation = u", ".join([u"{}: {}".format(k, v) for k, v in metadata.items()])
         annotated_query = u"/* {} */ {}".format(annotation, query)
         return annotated_query
 

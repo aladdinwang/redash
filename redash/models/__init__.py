@@ -112,6 +112,9 @@ class DataSource(BelongsToOrgMixin, db.Model):
     def __str__(self):
         return text_type(self.name)
 
+    def __hash__(self):
+        return hash(self.name)
+
     @classmethod
     def create_with_group(cls, *args, **kwargs):
         data_source = cls(*args, **kwargs)

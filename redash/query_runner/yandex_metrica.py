@@ -1,6 +1,6 @@
 import logging
 import yaml
-from urlparse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse
 
 import requests
 

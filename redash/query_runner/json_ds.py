@@ -3,7 +3,7 @@ import yaml
 import socket
 import ipaddress
 import datetime
-from urlparse import urlparse
+from urllib.parse import urlparse
 from funcy import compact, project
 from six import text_type
 from redash.utils import json_dumps

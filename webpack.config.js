@@ -91,7 +91,7 @@ const config = {
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        use: ["babel-loader", "eslint-loader"]
+        use: ["babel-loader"]
       },
       {
         test: /\.html$/,
@@ -109,10 +109,7 @@ const config = {
             loader: MiniCssExtractPlugin.loader
           },
           {
-            loader: "css-loader",
-            options: {
-              minimize: process.env.NODE_ENV === "production"
-            }
+            loader: "css-loader"
           }
         ]
       },
@@ -124,9 +121,6 @@ const config = {
           },
           {
             loader: "css-loader",
-            options: {
-              minimize: process.env.NODE_ENV === "production"
-            }
           },
           {
             loader: "less-loader",

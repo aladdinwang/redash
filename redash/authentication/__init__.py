@@ -2,7 +2,7 @@ import hashlib
 import hmac
 import logging
 import time
-from urlparse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from flask import jsonify, redirect, request, url_for
 from flask_login import LoginManager, login_user, logout_user, user_logged_in

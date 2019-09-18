@@ -20,10 +20,9 @@ class CustomPrint(object):
         self.lines = []
 
     def write(self, text):
-        if self.enabled:
-            if text and text.strip():
-                log_line = "[{0}] {1}".format(datetime.datetime.utcnow().isoformat(), text)
-                self.lines.append(log_line)
+        if text and text.strip():
+            log_line = "[{0}] {1}".format(datetime.datetime.utcnow().isoformat(), text)
+            self.lines.append(log_line)
 
     def enable(self):
         self.enabled = True
@@ -31,7 +30,11 @@ class CustomPrint(object):
     def disable(self):
         self.enabled = False
 
-    def __call__(self):
+    def _call_print(self, *args, **kwargs):
+        if args and self.enabled:
+            self.write(' '.join(str(i) for i in args))
+
+    def __call__(self, *args, **kwargs):
         return self
 
 
@@ -39,11 +42,11 @@ class Python(BaseQueryRunner):
     should_annotate_query = False
 
     safe_builtins = (
-        'sorted', 'reversed', 'map', 'reduce', 'any', 'all',
+        'sorted', 'reversed', 'map', 'any', 'all',
         'slice', 'filter', 'len', 'next', 'enumerate',
-        'sum', 'abs', 'min', 'max', 'round', 'cmp', 'divmod',
-        'str', 'unicode', 'int', 'float', 'complex',
-        'tuple', 'set', 'list', 'dict', 'bool',
+        'sum', 'abs', 'min', 'max', 'round', 'divmod',
+        'str', 'int', 'float', 'complex',
+        'tuple', 'set', 'list', 'dict', 'bool', 'locals'
     )
 
     @classmethod
@@ -85,17 +88,12 @@ class Python(BaseQueryRunner):
                     sys.path.append(p)
 
     def custom_import(self, name, globals=None, locals=None, fromlist=(), level=0):
-        if name in self._allowed_modules:
-            m = None
-            if self._allowed_modules[name] is None:
-                m = importlib.import_module(name)
-                self._allowed_modules[name] = m
-            else:
-                m = self._allowed_modules[name]
-
-            return m
-
-        raise Exception("'{0}' is not configured as a supported import module".format(name))
+        if not self._allowed_modules.get(name):
+            m = __import__(name, globals=globals, locals=locals, fromlist=fromlist, level=level)
+            self._allowed_modules[m] = m
+        else:
+            m = self._allowed_modules[name]
+        return m
 
     @staticmethod
     def custom_write(obj):
@@ -233,6 +231,7 @@ class Python(BaseQueryRunner):
             builtins["_getitem_"] = self.custom_get_item
             builtins["_getiter_"] = self.custom_get_iter
             builtins["_print_"] = self._custom_print
+            builtins['dir'] = dir
 
             # Layer in our own additional set of builtins that we have
             # considered safe.
@@ -260,7 +259,6 @@ class Python(BaseQueryRunner):
             # TODO: Figure out the best way to have a timeout on a script
             #       One option is to use ETA with Celery + timeouts on workers
             #       And replacement of worker process every X requests handled.
-
             exec((code), restricted_globals, self._script_locals)
 
             result = self._script_locals['result']

@@ -38,7 +38,7 @@ def dropdown_values(query_id, org):
 
 def join_parameter_list_values(parameters, schema):
     updated_parameters = {}
-    for (key, value) in parameters.iteritems():
+    for (key, value) in parameters.items():
         if isinstance(value, list):
             definition = next((definition for definition in schema if definition["name"] == key), {})
             multi_values_options = definition.get('multiValuesOptions', {})
@@ -71,7 +71,7 @@ def _collect_query_parameters(query):
 
 def _parameter_names(parameter_values):
     names = []
-    for key, value in parameter_values.iteritems():
+    for key, value in parameter_values.items():
         if isinstance(value, dict):
             for inner_key in value.keys():
                 names.append(u'{}.{}'.format(key, inner_key))
@@ -122,7 +122,7 @@ class ParameterizedQuery(object):
         self.parameters = {}
 
     def apply(self, parameters):
-        invalid_parameter_names = [key for (key, value) in parameters.iteritems() if not self._valid(key, value)]
+        invalid_parameter_names = [key for (key, value) in parameters.items() if not self._valid(key, value)]
         if invalid_parameter_names:
             raise InvalidParameterError(invalid_parameter_names)
         else:

@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 import urllib
-import urlparse
+# import urlparse
 
 import redis
 from flask_mail import Mail
