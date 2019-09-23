@@ -24,6 +24,7 @@ dev_worker() {
   WORKERS_COUNT=${WORKERS_COUNT:-2}
   QUEUES=${QUEUES:-queries,scheduled_queries,celery,schemas}
   SCHEDULE_DB=${SCHEDULE_DB:-celerybeat-schedule}
+  cp -rf /tmp/dist /app/client/dist
 
   echo "Starting dev scheduler and $WORKERS_COUNT workers for queues: $QUEUES..."
 
