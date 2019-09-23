@@ -2,32 +2,36 @@
 # For a production example please refer to setup/docker-compose.yml.
 version: '3.4'
 x-redash-service: &redash-service
-  build: .
+  build:
+    context: .
+    args:
+      skip_ds_deps: "yes"
+      skip_override_pip_conf: "${REDASH_SKIP_OVERRIDE_PIP_CONF}"
   depends_on:
     - redis
   env_file: .env
   restart: always
-#  volumes:
-#    - ".:/app"
+  volumes:
+    - ".:/app"
 
 services:
   server:
     <<: *redash-service
-    command: server
+    command: dev_server
     ports:
       - "5001:5000"
-  scheduler:
-    <<: *redash-service
-    command: scheduler
-    environment:
-      QUEUES: "celery"
-      WORKERS_COUNT: 1
+#  scheduler:
+#    <<: *redash-service
+#    command: scheduler
+#    environment:
+#      QUEUES: "celery"
+#      WORKERS_COUNT: 1
   worker:
     <<: *redash-service
-    command: worker
+    command: dev_worker
     environment:
-      QUEUES: "queries,scheduled_queries,schemas"
-      WORKERS_COUNT: 2
+      QUEUES: "queries,scheduled_queries,celery,schemas"
+      WORKERS_COUNT: 1
   redis:
     image: redis:3-alpine
     restart: unless-stopped

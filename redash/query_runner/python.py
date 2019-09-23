@@ -2,12 +2,14 @@ import datetime
 import importlib
 import logging
 import sys
+import traceback
 
 from redash.query_runner import *
 from redash.utils import json_dumps, json_loads
 from redash import models
 from RestrictedPython import compile_restricted
 from RestrictedPython.Guards import safe_builtins
+
 
 
 logger = logging.getLogger(__name__)
@@ -214,12 +216,30 @@ class Python(BaseQueryRunner):
         pass
 
     def run_query(self, query, user):
+        import random
+        import enums
+        from config.settings import get_config_value
+        from lib.database.database import Database
+        from lib import models
+
+        from api.graphql.logic.order_csv import XlsxWriter
+        import io
+
+        from lib.aws.file_uploader import FileUploader
+        from lib.utils import path_to_url
+        import csv
+        import uuid
+        import datetime
+
+        from lib.elastic.queries.order_query import OrdersQuery
+
         self._current_user = user
 
         try:
             error = None
 
             code = compile_restricted(query, '<string>', 'exec')
+            # code = compile(query, '<string>', 'exec')
 
             builtins = safe_builtins.copy()
             builtins["_write_"] = self.custom_write
@@ -259,7 +279,11 @@ class Python(BaseQueryRunner):
             # TODO: Figure out the best way to have a timeout on a script
             #       One option is to use ETA with Celery + timeouts on workers
             #       And replacement of worker process every X requests handled.
+
+            restricted_globals.update(locals())
             exec((code), restricted_globals, self._script_locals)
+
+            # exec((code), globals(), self._script_locals)
 
             result = self._script_locals['result']
             result['log'] = self._custom_print.lines
@@ -268,7 +292,8 @@ class Python(BaseQueryRunner):
             error = "Query cancelled by user."
             json_data = None
         except Exception as e:
-            error = str(type(e)) + " " + str(e)
+            error = traceback.format_exc()
+            # error = str(type(e)) + " " + str(e)
             json_data = None
 
         return json_data, error

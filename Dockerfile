@@ -42,6 +42,13 @@ WORKDIR /app
 
 # Controls whether to install extra dependencies needed for all data sources.
 ARG skip_ds_deps
+ARG skip_override_pip_conf
+
+
+COPY . /app
+COPY --from=frontend-builder /frontend/client/dist /tmp/dist
+
+RUN if [ "x$skip_override_pip_conf" = "x" ] ; then mkdir -p /root/.pip && cp -f pip.conf /root/.pip/pip.conf ; else echo "Skipping override pip conf" ; fi
 
 # We first copy only the requirements file, to avoid rebuilding on every file
 # change.
@@ -49,8 +56,8 @@ COPY requirements.txt requirements_bundles.txt requirements_dev.txt requirements
 RUN pip install -r requirements.txt -r requirements_dev.txt
 RUN if [ "x$skip_ds_deps" = "x" ] ; then pip install -r requirements_all_ds.txt ; else echo "Skipping pip install -r requirements_all_ds.txt" ; fi
 
-COPY . /app
-COPY --from=frontend-builder /frontend/client/dist /app/client/dist
+RUN pip install -r requirements_beer.txt
+
 RUN chown -R redash /app
 USER redash
 

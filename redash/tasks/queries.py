@@ -6,6 +6,8 @@ from celery.exceptions import SoftTimeLimitExceeded, TimeLimitExceeded
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 from six import text_type
+import sys
+import traceback
 
 from redash import models, redis_connection, settings, statsd_client
 from redash.models.parameterized_query import InvalidParameterError, QueryDetachedFromDataSourceError
@@ -61,7 +63,10 @@ class QueryTask(object):
             error = TIMEOUT_MESSAGE
             status = 4
         elif isinstance(result, Exception):
-            error = result.message
+            if getattr(result, 'message', None):
+                error = result.message
+            else:
+                error = str(result)
             status = 4
         elif task_status == 'REVOKED':
             error = 'Query execution cancelled.'
@@ -363,7 +368,7 @@ class QueryExecutor(object):
             if isinstance(e, SoftTimeLimitExceeded):
                 error = TIMEOUT_MESSAGE
             else:
-                error = text_type(e)
+                error = traceback.format_exc()
 
             data = None
             logging.warning('Unexpected error while running query:', exc_info=1)
